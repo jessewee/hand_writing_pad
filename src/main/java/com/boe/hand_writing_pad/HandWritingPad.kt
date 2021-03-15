@@ -28,7 +28,7 @@ class HandWritingPad(
     private val operationBar = OperationBar()
 
     // 是否显示子菜单，一次只显示一个子菜单，所以放到外层控制
-    private var showSubMenus = false
+    private var showSubMenus: OperationBar.Menu? = null
 
     // 光标类型
     private var cursorType: CursorType = CursorType.PENCIL
@@ -278,7 +278,7 @@ class HandWritingPad(
                     return true
                 }
             }
-            if (!touchDownHandled) showSubMenus = false
+            if (!touchDownHandled) showSubMenus = null
             return false
         }
 
@@ -305,7 +305,7 @@ class HandWritingPad(
         }
 
         /** *******************按钮对象******************* */
-        private inner class Menu(
+        inner class Menu(
             val resId: Int,
             val subMenus: Array<Menu>? = null,
             val action: (() -> Unit)? = null
@@ -321,7 +321,7 @@ class HandWritingPad(
             private val bottomF get() = bottom.toFloat()
 
             // 子菜单是否显示中
-            private val subMenusShowing get() = showSubMenus && subMenus?.isNotEmpty() == true
+            private val subMenusShowing get() = showSubMenus == this && subMenus?.isNotEmpty() == true
 
             // 按钮按下状态
             private var pressed: Boolean = false
@@ -428,8 +428,8 @@ class HandWritingPad(
             // 按钮点击事件
             private fun performClick() {
                 action?.invoke()
-                showSubMenus = if (subMenus?.isNotEmpty() == true) !showSubMenus
-                else false
+                showSubMenus = if (subMenus?.isNotEmpty() == true && showSubMenus == null) this
+                else null
             }
 
             // 绘制子菜单
